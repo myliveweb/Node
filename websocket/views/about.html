@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="uk-section" style="height: 100vh;">
+    <div class="uk-container">
+        <h1>{{ title }}</h1>
+        <button onclick="sendMessageToServer()" class="uk-button uk-button-default">Отправить сообщение на сервер</button>
+        <ul id="events" class="uk-list"></ul>
+    </div>
+</div>
+{% endblock %}
