@@ -40,16 +40,22 @@
                 {% for item in data %}
                 <div class="uk-card uk-card-default uk-card-body uk-text-center uk-inline-clip uk-transition-toggle">
                     <div>
-                        <img style="width: 100%;" src="/media/{{ item }}">
+                        {% if item.type == 'pic' %}
+                        <img style="width: 100%;" src="/media/{{ item.name }}">
+                        {% else %}
+                        <img style="width: 100%;" src="/static/img/icon/{{ item.type }}.png">
+                        {% endif %}
                         <div class="uk-transition-slide-bottom uk-position-bottom uk-overlay uk-overlay-default">
                             <p class="uk-h4 uk-margin-remove">
-                                <a class="uk-inline" uk-icon="icon: eye; ratio: 1.5" href="/media/{{ item }}" data-caption="{{ item }}"></a>
-                                <span class="js-download" data-src="{{ item }}" uk-icon="icon: download; ratio: 1.5"></span>
-                                <span class="js-delete" data-src="{{ item }}" uk-icon="icon: trash; ratio: 1.5"></span>
+                                {% if item.type == 'pic' %}
+                                <a class="uk-inline" uk-icon="icon: eye; ratio: 1.5" href="/media/{{ item.name }}" data-caption="{{ item.name }}"></a>
+                                {% endif %}
+                                <span class="js-download" data-src="{{ item.name }}" uk-icon="icon: download; ratio: 1.5"></span>
+                                <span class="js-delete" data-src="{{ item.name }}" uk-icon="icon: trash; ratio: 1.5"></span>
                             </p>
                         </div>
                     </div>
-                    <p class="uk-margin-small-top truncate" style="font-size: .8rem;">{{ item }}</p>
+                    <p class="uk-margin-small-top truncate" style="font-size: .8rem;">{{ item.name }}</p>
                 </div>
                 {% endfor %}
                 </div>

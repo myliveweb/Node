@@ -16,14 +16,37 @@ socket.on('message', message =>
     $events.appendChild(newItem(message))
 );
 socket.on('private message', message =>
-    console.log(
-        'Private message from server: ',
-        message
-    )
+    console.log('Private message from server: ', message)
 );
 
 function sendMessageToServer() {
-    socket.emit('message', "I'm client");
+    const now = new Date()
+
+    let hours = now.getHours()
+    if(now.getHours() < 10) {
+        hours = `0${now.getHours()}`
+    }
+
+    let min = now.getMinutes()
+    if(now.getMinutes() < 10) {
+        min = `0${now.getMinutes()}`
+    }
+
+    let sec = now.getSeconds()
+    if(now.getSeconds() < 10) {
+        sec = `0${now.getSeconds()}`
+    }
+    const datestart = `${hours}:${min}:${sec} ${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`
+    const dateend = `${hours}:${min}:${sec} ${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`
+    const datetotal = dateend - datestart
+    const data = {
+        parser: 'browse',
+        payload: 'Я браузерный клиент',
+        datestart: datestart,
+        dateend: dateend,
+        datetotal: datetotal
+    }
+    socket.emit('message', JSON.stringify(data));
 }
 
 // Upload
@@ -55,20 +78,28 @@ function progressHandler(event) {
 }
 
 function completeHandler(event) {
+    const targetObj = JSON.parse(event.target.response)
+    console.log(targetObj)
     let div = document.createElement('div');
     div.className = 'uk-card uk-card-default uk-card-body uk-text-center uk-inline-clip uk-transition-toggle'
     let html = `
         <div>
-            <img style="width: 100%;" src="/media/${ event.target.response }">
+            ${targetObj.type == 'pic' ? `
+            <img style="width: 100%;" src="/media/${ targetObj.name }">
+            `:`
+            <img style="width: 100%;" src="/static/img/icon/${ targetObj.type }.png">
+            `}
             <div class="uk-transition-slide-bottom uk-position-bottom uk-overlay uk-overlay-default">
                 <p class="uk-h4 uk-margin-remove">
-                    <a class="uk-inline" uk-icon="icon: eye; ratio: 1.5" href="/media/${ event.target.response }" data-caption="${ event.target.response }"></a>
-                    <span class="js-download" data-src="${ event.target.response }" uk-icon="icon: download; ratio: 1.5"></span>
-                    <span class="js-delete" data-src="${ event.target.response }" uk-icon="icon: trash; ratio: 1.5"></span>
+                    ${targetObj.type == 'pic' ? `
+                    <a class="uk-inline" uk-icon="icon: eye; ratio: 1.5" href="/media/${ targetObj.name }" data-caption="${ targetObj.name }"></a>
+                    `:``}
+                    <span class="js-download" data-src="${ targetObj.name }" uk-icon="icon: download; ratio: 1.5"></span>
+                    <span class="js-delete" data-src="${ targetObj.name }" uk-icon="icon: trash; ratio: 1.5"></span>
                 </p>
             </div>
         </div>
-        <p class="uk-margin-small-top truncate" style="font-size: .8rem;">${ event.target.response }</p>      
+        <p class="uk-margin-small-top truncate" style="font-size: .8rem;">${ targetObj.name }</p>      
         `
     div.innerHTML = html
     _("box-media").prepend(div)

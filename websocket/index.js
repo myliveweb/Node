@@ -8,7 +8,6 @@ const express = require('express'),
       formidableMiddleware = require('express-formidable');
 
 require('dotenv').config()
-console.log(process.env.PGDATABASE)
 
 nunjucks.configure('views', {
     autoescape: true,
@@ -25,17 +24,32 @@ const host = process.env.HOST;
 const port = process.env.PORT;
 
 io.on('connection', socket => {
-    console.log(`Start Connection ID socket: ${socket.id}\n`)
+    const now = new Date()
+    const min = (now.getMinutes() < 10 ? '0' : '') + now.getMinutes()
+    const datestart = `${now.getHours()}:${min}:${now.getSeconds()} ${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`
 
-    socket.emit('message', "I'm server");
+    console.log(`Start Connection ID socket: ${socket.id}, ${datestart}\n`)
+
+    socket.emit('message', "Я сервер. Зарегистрировал вас.");
 
     socket.on('message', message => {
-        console.log('Received from client: %s', message);
-        io.emit('message', `Received from client: ${message}`);
+        jsonMessage = JSON.parse(message)
+        console.log('Received from client: %s, %s\n', jsonMessage.parser, jsonMessage.datestart);
+        io.emit('message', `Прислано от клиента ${jsonMessage.parser}. Старт: ${jsonMessage.datestart}. Время парсинга: ${jsonMessage.datetotal}.`);
     });
 });
 
 app.use(express.static(__dirname));
+
+function randStr(len) {
+    chrs = 'abdehkmnpswxz123456789';
+    let str = '';
+    for (let i = 0; i < len; i++) {
+        let pos = Math.floor(Math.random() * chrs.length);
+        str += chrs.substring(pos,pos+1);
+    }
+    return str;
+}
 
 const mapFiles = fileName => ({
     name: fileName,
@@ -47,7 +61,9 @@ const getFiles = function (dir, files_) {
     const files = fs.readdirSync(dir)
     for (let i in files){
         let name = files[i]
-        files_.push(name);
+        let ext = path.parse(name).ext
+        if(ext)
+            files_.push(name);
     }
 
     const out = files_.map(mapFiles)
@@ -59,7 +75,23 @@ const getFiles = function (dir, files_) {
 
 app.get('/', (req, res) => {
     const data = getFiles(process.env.UPLOAD_DIR)
-    res.render('index.html', {title: 'Home', menu: 'home', data: data})
+    let objFiles = data.map(function(itemDate) {
+        let type = 'nan'
+        let ext = path.parse(itemDate).ext.substring(1)
+        if(ext === 'jpg' || ext === 'jpeg' || ext === 'png' || ext === 'gif' || ext === 'webp') {
+            type = 'pic'
+        } else if(ext === 'doc' || ext === 'docx') {
+            type = 'world'
+        } else if(ext === 'txt') {
+            type = 'text'
+        } else if(ext === 'xls' || ext === 'xlsx' || ext === 'csv') {
+            type = 'excel'
+        } else if(ext === 'pdf') {
+            type = 'pdf'
+        }
+        return {name: itemDate, ext: ext, type: type}
+    })
+    res.render('index.html', {title: 'Home', menu: 'home', data: objFiles})
 });
 
 app.get('/about', (req, res) =>
@@ -67,11 +99,37 @@ app.get('/about', (req, res) =>
 
 app.post('/upload', (req, res) => {
     const oldpath = req.files.file1.path;
-    const newpath = `${process.env.UPLOAD_DIR}/${req.files.file1.name}`;
-    fs.rename(oldpath, newpath, function (err) {
-        if (err) throw err;
-        res.send(req.files.file1.name).end();
-    });
+    let fileName = req.files.file1.name
+    let newpath = `${process.env.UPLOAD_DIR}/${fileName}`;
+    fs.access(newpath, fs.F_OK, (err) => {
+        if (!err) {
+            console.log('Файл существует')
+            const baseName = path.parse(fileName).name
+            const baseExt = path.parse(fileName).ext.substring(1)
+            const random8 = randStr(6)
+            fileName = `${baseName}-${random8}.${baseExt}`
+            newpath = `${process.env.UPLOAD_DIR}/${fileName}`;
+        }
+        fs.rename(oldpath, newpath, function (err) {
+            if (err) throw err;
+
+            let type = 'nan'
+            let ext = path.parse(fileName).ext.substring(1)
+            if(ext === 'jpg' || ext === 'jpeg' || ext === 'png' || ext === 'gif' || ext === 'webp') {
+                type = 'pic'
+            } else if(ext === 'doc' || ext === 'docx') {
+                type = 'world'
+            } else if(ext === 'txt') {
+                type = 'text'
+            } else if(ext === 'xls' || ext === 'xlsx' || ext === 'csv') {
+                type = 'excel'
+            } else if(ext === 'pdf') {
+                type = 'pdf'
+            }
+            const outObj = {name: fileName, ext: ext, type: type}
+            res.send(outObj).end();
+        });
+    })
 });
 
 app.post('/deleteimage', (req, res) => {
