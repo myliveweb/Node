@@ -5,7 +5,8 @@ const express = require('express'),
       path = require('path'),
       nunjucks = require('nunjucks'),
       fs = require('fs-extra'),
-      formidableMiddleware = require('express-formidable');
+      formidableMiddleware = require('express-formidable'),
+      helpers = require('./helpers/functions.js');
 
 require('dotenv').config()
 
@@ -36,6 +37,7 @@ io.on('connection', socket => {
         jsonMessage = JSON.parse(message)
         console.log('Received from client: %s, %s\n', jsonMessage.parser, jsonMessage.datestart);
         io.emit('message', `Прислано от клиента ${jsonMessage.parser}. Старт: ${jsonMessage.datestart}. Время парсинга: ${jsonMessage.datetotal}.`);
+        helpers.addHistory(jsonMessage)
     });
 });
 

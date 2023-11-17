@@ -9,4 +9,4 @@ const sql = postgres({
     password: process.env.PGPASSWORD,
 })
 
-export default sql
+module.exports.sql = sql;
