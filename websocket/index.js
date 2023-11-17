@@ -27,9 +27,9 @@ const port = process.env.PORT;
 io.on('connection', socket => {
     const now = new Date()
     const min = (now.getMinutes() < 10 ? '0' : '') + now.getMinutes()
-    const datestart = `${now.getHours()}:${min}:${now.getSeconds()} ${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`
+    const datestartLocal = `${now.getHours()}:${min}:${now.getSeconds()} ${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`
 
-    console.log(`Start Connection ID socket: ${socket.id}, ${datestart}\n`)
+    console.log(`Start Connection ID socket: ${socket.id}, ${datestartLocal}\n`)
 
     socket.emit('message', "Я сервер. Зарегистрировал вас.");
 

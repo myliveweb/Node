@@ -36,12 +36,12 @@ function sendMessageToServer() {
     if(now.getSeconds() < 10) {
         sec = `0${now.getSeconds()}`
     }
-    const datestart = `${hours}:${min}:${sec} ${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`
-    const dateend = `${hours}:${min}:${sec} ${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`
-    const datetotal = dateend - datestart
+    const datestart = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${hours}:${min}:${sec}`
+    const dateend = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${hours}:${min}:${sec}`
+    const datetotal = now - now
     const data = {
         parser: 'browse',
-        payload: 'Я браузерный клиент',
+        payload: {title: 'Я браузерный клиент'},
         datestart: datestart,
         dateend: dateend,
         datetotal: datetotal
