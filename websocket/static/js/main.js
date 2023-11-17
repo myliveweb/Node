@@ -40,7 +40,7 @@ function sendMessageToServer() {
     const dateend = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${hours}:${min}:${sec}`
     const datetotal = now - now
     const data = {
-        parser: 'browse',
+        parser: 'browser',
         payload: {title: 'Я браузерный клиент'},
         datestart: datestart,
         dateend: dateend,

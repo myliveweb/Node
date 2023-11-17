@@ -6,15 +6,13 @@ async function getHistory() {
 }
 
 async function addHistory(data) {
-    // const now = new Date()
-    // const current = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()+3, now.getMinutes(), now.getSeconds())
     const objHistory = {
         datestart: data.datestart,
         dateend: data.dateend,
-        datetotal: 0,
+        datetotal: data.datetotal,
         create_at: new Date(),
         parser: data.parser,
-        payload: data.payload
+        payload: JSON.stringify(data.payload)
     }
     await db.sql`insert into history ${db.sql(objHistory, 'datestart', 'dateend', 'datetotal', 'create_at', 'parser', 'payload')}`
 }
